@@ -13,7 +13,8 @@
 
 //#define WIFI_SSID "Hexio"
 //#define WIFI_PASSWORD "dnne4216"
- 
+
+//#define  docID = ds2DMiM3BYW95mtKkpQ2xFghFEC2;
 String myString;
 int vr = A0; // variable resistor connected 
 int sdata = 0; // The variable resistor value will be stored in sdata.
@@ -21,6 +22,9 @@ int d0 = D0;
 unsigned long time1 = 0;
 unsigned long time2 = 0;
 unsigned long time3 = 0;
+String docID = "ds2DMiM3BYW95mtKkpQ2xFghFEC2";
+String temp;
+
 
  
 void setup()
@@ -44,6 +48,7 @@ void setup()
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
   Serial.print("Firebase Connection status - ");
   Serial.println(Firebase.success());
+  temp = docID + "/Val";
  
 //    Firebase.setString("Variable/Value","fahad");
 }
@@ -57,8 +62,9 @@ sdata = analogRead(vr);
 myString = String(sdata);
 //Serial.println("start1");  
 Serial.println(myString);
-//Serial.println("firebaseCommand - Start"); 
-Firebase.setString("Variable/Value",myString);
+//Serial.println("firebaseCommand - Start");
+ 
+Firebase.setString(temp,myString);
 Serial.println(Firebase.success());
 delay(5000);            
 }
