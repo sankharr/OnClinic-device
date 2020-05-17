@@ -35,11 +35,20 @@ String temperatureString;
 int vr = A0;   // variable resistor connected
 int sdata = 0; // The variable resistor value will be stored in sdata.
 int inPin = D5;
+int modeButton = D6;
 
 String docID = "ds2DMiM3BYW95mtKkpQ2xFghFEC2";
 String temp;
 String temp2;
 int buttonStatus = 0;
+int modeButtonStatus = 0;
+bool modeSwitch = false;
+
+int state = HIGH;
+int reading;
+int previous = LOW;
+long timek = 0;
+long debounce = 200;
 
 float temperatureValue = 0;
 
@@ -68,6 +77,7 @@ void setup()
   pinMode(vr, INPUT);
   // connect to wifi.
   pinMode(inPin, INPUT);
+  pinMode(modeButton, INPUT);
 
   display.clearDisplay();         //'Connecting' message
   display.setTextColor(SSD1306_WHITE);  
@@ -106,28 +116,61 @@ void setup()
 
 void loop()
 {
-  getTemperatureData();  
   
-  buttonStatus = digitalRead(inPin);
+  reading = digitalRead(modeButton);
+
+  if (reading == HIGH && previous == LOW && millis() - timek > debounce) {
+    if (state == HIGH)
+      state = LOW;
+    else
+      state = HIGH;
+
+    timek = millis();    
+  }
+
+//  if (modeButtonStatus == HIGH) {
+//    modeSwitch = !modeSwitch;
+//    Serial.println(modeSwitch);
+////    display.println("");        
+////    display.println("Second button works!");
+////    display.display();
+//  }
   
 //  sdata = analogRead(vr);             //<-------for variable resistor
 //  myString = String(sdata);
 //  Serial.println(myString);
 
-  temperatureString = String(temperatureValue);
-   display.setTextSize(1);
-   
-  if (buttonStatus == HIGH)
-  {
-//    Firebase.setString(temp, myString);   //<------------for variable resistor
-    
-    Firebase.setString(temp2, temperatureString);
-    display.println("");        
-    display.println("Updated the database!");
+  if (state == HIGH) {
+    display.clearDisplay();
+  
+    display.setTextSize(1);             // Normal 1:1 pixel scale
+    display.setTextColor(SSD1306_WHITE);        // Draw white text
+    display.setCursor(15,30);             // Start at top-left corner
+    display.println("Heart beat mode");
     display.display();
-        
-    delay(1000);
   }
+  else{
+    getTemperatureData();  
+  
+    buttonStatus = digitalRead(inPin);
+    temperatureString = String(temperatureValue);
+     display.setTextSize(1);
+     
+    if (buttonStatus == HIGH)
+    {
+  //    Firebase.setString(temp, myString);   //<------------for variable resistor
+      
+      Firebase.setString(temp2, temperatureString);
+      display.println("");        
+      display.println("Updated the database!");
+      display.display();
+          
+      delay(1000);
+    }
+  }
+
+  previous = reading;
+  
 //  Serial.println(buttonStatus);
 //  Serial.println(Firebase.success());
 //  delay(1000);
