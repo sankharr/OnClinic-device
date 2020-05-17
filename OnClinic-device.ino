@@ -52,13 +52,30 @@ void setup()
     for(;;); // Don't proceed, loop forever
   }
 //  delay(2000);
-  display.clearDisplay();  //relevant to display
-   
+  display.clearDisplay();         //Welcome Screen
+  display.setCursor(35,20);
+  display.setTextColor(SSD1306_WHITE); 
+  display.setTextSize(1);           
+  display.println("Welcome To");
+  display.setTextSize(2);
+  display.setCursor(16,30);  
+  display.println("OnClinic");
+  display.display();
+  delay(2000);
+  
   sensors.begin();  //relevent to temperature sensor 
   
   pinMode(vr, INPUT);
   // connect to wifi.
   pinMode(inPin, INPUT);
+
+  display.clearDisplay();         //'Connecting' message
+  display.setTextColor(SSD1306_WHITE);  
+  display.setCursor(25,30);
+  display.setTextSize(1);               
+  display.println("Connecting....");
+  display.display();
+  
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("connecting");
   while (WiFi.status() != WL_CONNECTED)
@@ -73,6 +90,16 @@ void setup()
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
   Serial.print("Firebase Connection status - ");
   Serial.println(Firebase.success());
+
+  display.clearDisplay();           //'Connection Successful' message
+  display.setTextColor(SSD1306_WHITE);  
+  display.setCursor(33,25);             
+  display.println("Connection");
+  display.setCursor(32,35);
+  display.println("Successful!");
+  display.display();
+  delay(2000);
+  
   temp = docID + "/Val";
   temp2 = docID + "/temperature";
 }
