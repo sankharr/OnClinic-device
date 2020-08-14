@@ -44,6 +44,7 @@ DallasTemperature sensors(&oneWire);
 
 String myString;
 String temperatureString;
+String valueString;
 int vr = A0;   // variable resistor connected
 int sdata = 0; // The variable resistor value will be stored in sdata.
 int inPin = D5;
@@ -52,6 +53,7 @@ int modeButton = D6;
 String docID = "ds2DMiM3BYW95mtKkpQ2xFghFEC2";
 String temp;
 String temp2;
+String path3;
 int buttonStatus = 0;
 int modeButtonStatus = 0;
 bool modeSwitch = false;
@@ -94,9 +96,9 @@ void setup()
   display.setTextColor(SSD1306_WHITE); 
   display.setTextSize(1);           
   display.println("Welcome To");
-  display.setTextSize(2);
-  display.setCursor(16,30);  
-  display.println("OnClinic");
+  display.setTextSize(1);
+  display.setCursor(30,30);  
+  display.println("HospitalCore");
   display.display();
   delay(2000);
   
@@ -144,6 +146,7 @@ void setup()
   
   temp = docID + "/Val";
   temp2 = docID + "/temperature";
+  path3 = docID + "/heartBeat";
 }
 
 void loop()
@@ -199,7 +202,18 @@ void loop()
         display.display();
         tone(3,1000);                                        //And tone the buzzer for a 100ms you can reduce it it will be better
         delay(100);
-        noTone(3);                                          //Deactivate the buzzer to have the effect of a "bip"
+        noTone(3);
+        buttonStatus = digitalRead(inPin);
+        valueString = String(beatAvg);
+        if (buttonStatus == HIGH)
+        { 
+          display.setTextSize(1);
+          Firebase.setString(path3, valueString);
+          display.println("");        
+          display.println("Updated the database!");
+          display.display();              
+          delay(1000);
+        }//Deactivate the buzzer to have the effect of a "bip"
         //We sensed a beat!
         long delta = millis() - lastBeat;                   //Measure duration between two beats
         lastBeat = millis();
