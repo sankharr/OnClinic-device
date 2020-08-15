@@ -64,6 +64,14 @@ int previous = LOW;
 long timek = 0;
 long debounce = 200;
 
+boolean userMenu = true;
+int menuItemNumber = 0;
+int menuItemInterrupt = D7;
+int menuInterruptTemp;
+int familyMembers = 3;
+int readingMenuItem;
+int readingSelection;
+
 float temperatureValue = 0;
 
 static const unsigned char PROGMEM logo2_bmp[] =
@@ -112,6 +120,9 @@ void setup()
   // connect to wifi.
   pinMode(inPin, INPUT);
   pinMode(modeButton, INPUT);
+  pinMode(menuItemInterrupt,INPUT);
+
+  
 
   display.clearDisplay();         //'Connecting' message
   display.setTextColor(SSD1306_WHITE);  
@@ -143,6 +154,80 @@ void setup()
   display.println("Successful!");
   display.display();
   delay(2000);
+
+//  attachInterrupt(digitalPinToInterrupt(menuItemInterrupt),menuItemInterruptFunc,CHANGE);
+
+  while(userMenu){
+    readingMenuItem = digitalRead(menuItemInterrupt);
+    readingSelection = digitalRead(D8);
+    if(menuItemNumber == 0){
+      if(readingMenuItem == HIGH){
+        Serial.println("readingMenuItem button pressed 0");
+        menuItemNumber = 1;
+        delay(200);
+      }
+      display.clearDisplay();           
+      display.setTextColor(SSD1306_WHITE);  
+      display.setCursor(0,0);             
+      display.println("Select the user");
+      display.println("");
+      display.println("> Mr. Sankha");
+      display.println("  Mr. Saman Kumara");
+      display.println("  Mrs. Hasini");      
+      display.display();
+      docID = "ds2DMiM3BYW95mtKkpQ2xFghFEC2";
+      if(readingSelection == HIGH){
+        Serial.println("readingSelection button pressed 0");
+        break;
+        delay(100);
+      }     
+    }
+    else if(menuItemNumber == 1){
+      if(readingMenuItem == HIGH){
+        Serial.println("readingMenuItem button pressed 1");
+        menuItemNumber = 2;
+        delay(200);
+      }
+      display.clearDisplay();           
+      display.setTextColor(SSD1306_WHITE);  
+      display.setCursor(0,0);             
+      display.println("Select the user");
+      display.println("");
+      display.println("  Mr. Sankha");
+      display.println("> Mr. Saman Kumara");
+      display.println("  Mrs. Hasini");               
+      display.display();
+      docID = "5KhkF3kNOWOrQQsSntV4fNjd5b33";
+      if(readingSelection == HIGH){
+        Serial.println("readingSelection button pressed 1");
+        break;
+        delay(100);
+      }    
+    }
+
+    else if(menuItemNumber == 2){
+      if(readingMenuItem == HIGH){
+        Serial.println("readingMenuItem button pressed 2");
+        menuItemNumber = 0;
+        delay(200);
+      }
+      display.clearDisplay();           
+      display.setTextColor(SSD1306_WHITE);  
+      display.setCursor(0,0);             
+      display.println("Select the user");
+      display.println("");
+      display.println("  Mr. Sankha");
+      display.println("  Mr. Saman Kumara");
+      display.println("> Mrs. Hasini");       
+      display.display();
+      docID = "UWEyA2c6BzUy3asJObQvuqAtWHo2";
+      if(readingSelection == HIGH){
+        Serial.println("readingSelection button pressed 0");
+        break;
+        delay(100);
+      }       
+    }
+  }
   
   temp = docID + "/Val";
   temp2 = docID + "/temperature";
@@ -296,4 +381,9 @@ void getTemperatureData() {
 
   display.display();
   
+}
+
+void menuItemInterruptFunc() {
+//  menuInterruptTemp = menuItemNumber + 1;
+  menuItemNumber =(menuItemNumber + 1) % 3;
 }
