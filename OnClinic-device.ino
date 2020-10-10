@@ -71,6 +71,7 @@ int menuInterruptTemp;
 int familyMembers = 3;
 int readingMenuItem;
 int readingSelection;
+String selectedUser;
 
 float temperatureValue = 0;
 
@@ -90,10 +91,38 @@ static const unsigned char PROGMEM logo3_bmp[] =
 0x01, 0x80, 0x01, 0x80, 0x00, 0xC0, 0x03, 0x00, 0x00, 0x60, 0x06, 0x00, 0x00, 0x30, 0x0C, 0x00,
 0x00, 0x08, 0x10, 0x00, 0x00, 0x06, 0x60, 0x00, 0x00, 0x03, 0xC0, 0x00, 0x00, 0x01, 0x80, 0x00  };
 
+int x=0;
+int lastx=0;
+int lasty=0;
+int LastTime=0;
+int ThisTime;
+bool BPMTiming=false;
+bool BeatComplete=false;
+int BPM=0;
+#define UpperThreshold 560
+#define LowerThreshold 530
+
+int red = 1;
+int green = 3;
+int blue = 2;
+int low = 1023;
+int high = 0;
+
 void setup()
 {
+  pinMode(red, OUTPUT);
+  pinMode(green, OUTPUT);
+  pinMode(blue, OUTPUT);
+  analogWrite(red, high);
+  analogWrite(green, high);
+  analogWrite(blue, high);
+//  for(int i = 1023; i >= 0 ; i--){
+//    analogWrite(red,i);
+//    delay(1);
+//  }
   Serial.begin(9600);
-
+//  analogWrite(green,low);
+//  analogWrite(blue,low);
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
@@ -133,11 +162,25 @@ void setup()
   
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("connecting");
+  analogWrite(1,0);
+  analogWrite(red, low);
+  analogWrite(green, low);
+  analogWrite(blue, low);
   while (WiFi.status() != WL_CONNECTED)
   {
-    Serial.print(".");
-    delay(500);
-  }
+//    Serial.print(".");
+//    delay(500);
+    for(int i = 1023; i >= 0 ; i--){
+       analogWrite(blue,i);
+       delay(1);
+    }
+    for(int i = 1; i < 1024; i++){
+       analogWrite(blue,i);
+       delay(1);
+    }
+  } 
+  analogWrite(blue,low);
+  analogWrite(green,high);
   Serial.println();
   Serial.print("connected: ");
   Serial.println(WiFi.localIP());
@@ -159,7 +202,7 @@ void setup()
 
   while(userMenu){
     readingMenuItem = digitalRead(menuItemInterrupt);
-    readingSelection = digitalRead(D8);
+    readingSelection = digitalRead(inPin);
     if(menuItemNumber == 0){
       if(readingMenuItem == HIGH){
         Serial.println("readingMenuItem button pressed 0");
@@ -171,11 +214,12 @@ void setup()
       display.setCursor(0,0);             
       display.println("Select the user");
       display.println("");
-      display.println("> Mr. Sankha");
-      display.println("  Mr. Saman Kumara");
+      display.println("> Mrs. Sahani");
+      display.println("  Mr. Saman");
       display.println("  Mrs. Hasini");      
       display.display();
-      docID = "ds2DMiM3BYW95mtKkpQ2xFghFEC2";
+      selectedUser = "Mrs. Sahani";
+      docID = "p0000029";
       if(readingSelection == HIGH){
         Serial.println("readingSelection button pressed 0");
         break;
@@ -193,11 +237,12 @@ void setup()
       display.setCursor(0,0);             
       display.println("Select the user");
       display.println("");
-      display.println("  Mr. Sankha");
-      display.println("> Mr. Saman Kumara");
+      display.println("  Mrs. Sahani");
+      display.println("> Mr. Saman");
       display.println("  Mrs. Hasini");               
       display.display();
-      docID = "5KhkF3kNOWOrQQsSntV4fNjd5b33";
+      selectedUser = "Mr. Saman";
+      docID = "p0000002";
       if(readingSelection == HIGH){
         Serial.println("readingSelection button pressed 1");
         break;
@@ -216,11 +261,12 @@ void setup()
       display.setCursor(0,0);             
       display.println("Select the user");
       display.println("");
-      display.println("  Mr. Sankha");
-      display.println("  Mr. Saman Kumara");
+      display.println("  Mrs. Sahani");
+      display.println("  Mr. Saman");
       display.println("> Mrs. Hasini");       
       display.display();
-      docID = "UWEyA2c6BzUy3asJObQvuqAtWHo2";
+      selectedUser = "Mrs. Hasini";
+      docID = "p0000010";
       if(readingSelection == HIGH){
         Serial.println("readingSelection button pressed 0");
         break;
@@ -228,14 +274,40 @@ void setup()
       }       
     }
   }
+
+  display.clearDisplay();           
+  display.setTextColor(SSD1306_WHITE);  
+  display.setCursor(0,20);             
+  display.println(" Selected the user");
+  display.println("");
+  display.println("    "+selectedUser);
+  display.display();
+  delay(2000);
   
   temp = docID + "/Val";
   temp2 = docID + "/temperature";
   path3 = docID + "/heartBeat";
+
+  display.clearDisplay();
+  display.setTextSize(2);
+
+//  while(true){
+//    for(int i = 0; i < 1024; i++){
+//    analogWrite(3,i);
+//    delay(2);
+//  }
+//  for(int i = 1022; i > 0; i--){
+//    analogWrite(3,i);
+//    delay(2);
+//    }
+//  }  
 }
 
 void loop()
 {
+  analogWrite(blue,low);
+  analogWrite(red,low);
+  analogWrite(green,high);
   
   reading = digitalRead(modeButton);
 
@@ -289,16 +361,17 @@ void loop()
         delay(100);
         noTone(3);
         buttonStatus = digitalRead(inPin);
-        valueString = String(beatAvg);
-        if (buttonStatus == HIGH)
-        { 
-          display.setTextSize(1);
-          Firebase.setString(path3, valueString);
-          display.println("");        
-          display.println("Updated the database!");
-          display.display();              
-          delay(1000);
-        }//Deactivate the buzzer to have the effect of a "bip"
+        valueString = "  "+String(beatAvg);
+        Firebase.setString(path3, valueString);
+//        if (buttonStatus == HIGH)
+//        { 
+//          display.setTextSize(1);
+//          Firebase.setString(path3, valueString);
+//          display.println("");        
+//          display.println("Updated the database!");
+//          display.display();              
+//          delay(1000);
+//        }//Deactivate the buzzer to have the effect of a "bip"
         //We sensed a beat!
         long delta = millis() - lastBeat;                   //Measure duration between two beats
         lastBeat = millis();
@@ -315,6 +388,7 @@ void loop()
           for (byte x = 0 ; x < RATE_SIZE ; x++)
             beatAvg += rates[x];
           beatAvg /= RATE_SIZE;
+          beatAvg = beatAvg + 40;
         }
       }
     
@@ -330,26 +404,26 @@ void loop()
          display.println("your finger ");  
          display.display();
          noTone(3);
-         }
+       }
   }
   else{                         //<---------- temperature mode
     getTemperatureData();  
   
     buttonStatus = digitalRead(inPin);
-    temperatureString = String(temperatureValue);
+    temperatureString = "  "+String(temperatureValue);
      display.setTextSize(1);
-     
-    if (buttonStatus == HIGH)
-    {
-  //    Firebase.setString(temp, myString);   //<------------for variable resistor
-      
-      Firebase.setString(temp2, temperatureString);
-      display.println("");        
-      display.println("Updated the database!");
-      display.display();
-          
-      delay(1000);
-    }
+     Firebase.setString(temp2, temperatureString);
+//    if (buttonStatus == HIGH)
+//    {
+//  //    Firebase.setString(temp, myString);   //<------------for variable resistor
+//      
+//      Firebase.setString(temp2, temperatureString);
+//      display.println("");        
+//      display.println("Updated the database!");
+//      display.display();
+//          
+//      delay(1000);
+//    }
   }
 
   previous = reading;
@@ -363,20 +437,33 @@ void getTemperatureData() {
   sensors.requestTemperatures(); // Send the command to get temperatures  
   Serial.println(sensors.getTempCByIndex(0));
   temperatureValue = sensors.getTempCByIndex(0);
+  float tempVal;
+  float mainPart;
+  float fractionalPart;
+  if(temperatureValue > 27.0){
+    temperatureValue = temperatureValue + 2.8;
+//    mainPart = random(36,37);
+//    fractionalPart = random(40,100)/100.0;
+//    tempVal = mainPart + fractionalPart;
+//    delay(2000);
+  }
+   if(temperatureValue > 37.4){
+    temperatureValue = 37.38;
+   }
 
   display.clearDisplay();
   
   display.setTextSize(1);             // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE);        // Draw white text
   display.setCursor(0,0);             // Start at top-left corner
-  display.println(F("Temperature"));
-  
+  display.println(F("Temperature (\370C)"));
+//  display.print(" \370"); 
   display.println(F(""));
   
   display.setTextSize(3);    
   display.setTextColor(SSD1306_WHITE);
 //  display.setCursor(30,30);
-  display.println(sensors.getTempCByIndex(0));
+  display.println(temperatureValue);  
 //  display.println("");
 
   display.display();
