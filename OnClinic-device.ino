@@ -39,6 +39,15 @@ DallasTemperature sensors(&oneWire);
 #define WIFI_SSID "Redhat"
 #define WIFI_PASSWORD "c#FRt/qLvD"
 
+String user1Name = "Mrs. Sahani";
+String user1docID = "p0000029";
+
+String user2Name = "Mr. Saman";
+String user2docID = "p0000002";
+
+String user3Name = "Mrs. Hasini";
+String user3docID = "p0000010";
+
 //#define WIFI_SSID "Hexio"
 //#define WIFI_PASSWORD "dnne4216"
 
@@ -214,12 +223,12 @@ void setup()
       display.setCursor(0,0);             
       display.println("Select the user");
       display.println("");
-      display.println("> Mrs. Sahani");
-      display.println("  Mr. Saman");
-      display.println("  Mrs. Hasini");      
+      display.println("> "+user1Name);
+      display.println("  "+user2Name);
+      display.println("  "+user3Name);      
       display.display();
-      selectedUser = "Mrs. Sahani";
-      docID = "p0000029";
+      selectedUser = user1Name;
+      docID = user1docID;
       if(readingSelection == HIGH){
         Serial.println("readingSelection button pressed 0");
         break;
@@ -237,12 +246,12 @@ void setup()
       display.setCursor(0,0);             
       display.println("Select the user");
       display.println("");
-      display.println("  Mrs. Sahani");
-      display.println("> Mr. Saman");
-      display.println("  Mrs. Hasini");               
+      display.println("  "+user1Name);
+      display.println("> "+user2Name);
+      display.println("  "+user3Name);               
       display.display();
-      selectedUser = "Mr. Saman";
-      docID = "p0000002";
+      selectedUser = user2Name;
+      docID = user2docID;
       if(readingSelection == HIGH){
         Serial.println("readingSelection button pressed 1");
         break;
@@ -261,12 +270,12 @@ void setup()
       display.setCursor(0,0);             
       display.println("Select the user");
       display.println("");
-      display.println("  Mrs. Sahani");
-      display.println("  Mr. Saman");
-      display.println("> Mrs. Hasini");       
+      display.println("  "+user1Name);
+      display.println("  "+user2Name);
+      display.println("> "+user3Name);     
       display.display();
-      selectedUser = "Mrs. Hasini";
-      docID = "p0000010";
+      selectedUser = user3Name;
+      docID = user3docID;
       if(readingSelection == HIGH){
         Serial.println("readingSelection button pressed 0");
         break;
